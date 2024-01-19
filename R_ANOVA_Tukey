@@ -1,0 +1,31 @@
+#For first time users, type line 2 and 3 in the console
+#install.packages("openxlsx")
+#install.packages("tidyr")
+#install.packages("userfriendlyscience")
+#Make sure the excel file has the proper format, with col1 title 'x' and col2 title 'y'
+#To run the program, press: Ctrl+Shift+Enter
+library(userfriendlyscience)
+library(openxlsx)
+library(tidyr)
+
+rawdata=read.xlsx(file.choose(),startRow = 1, colNames = TRUE, detectDates = TRUE)
+rawdata2<-gather(rawdata,x,y,1:ncol(rawdata))
+rawdata3<-na.omit(rawdata2)
+
+#Anova
+anova=summary(aov(y~x, data = rawdata3))
+if (anova[[1]][["Pr(>F)"]][1]<0.05){
+  Tukey=posthocTGH(y=rawdata3$y, x=rawdata3$x,method="tukey",digits=5)
+  pairnames<-Tukey[["intermediate"]][["pairNames"]]
+  diff<-Tukey[["output"]][["tukey"]][["diff"]]
+  ci.lo<-Tukey[["output"]][["tukey"]][["ci.lo"]]
+  ci.hi<-Tukey[["output"]][["tukey"]][["ci.hi"]]
+  t<-Tukey[["output"]][["tukey"]][["t"]]
+  df<-Tukey[["output"]][["tukey"]][["df"]]
+  p_value<-Tukey[["output"]][["tukey"]][["p"]]
+  Tukeydata<-data.frame(pairnames,diff,ci.lo,ci.hi,t,df,p_value)
+  write.xlsx(Tukeydata,file.choose(), asTable = FALSE,colNames=TRUE)
+}else{
+  print("The Null hypothesis H0 (Means are all equal) is True")
+}
+Anova
