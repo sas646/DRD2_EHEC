@@ -1,0 +1,9 @@
+library(openxlsx)
+library(tidyr)
+library(ggplot2)
+File=file.choose()
+rawdata=read.xlsx(File,startRow = 1, colNames = TRUE, detectDates = TRUE)
+rawdata2<-gather(rawdata,xx,yy,1:ncol(rawdata))
+rawdata3<-na.omit(rawdata2)
+ggplot(rawdata3,aes(x=xx,y=yy))+geom_boxplot(width=0.1)+theme_bw()+
+  theme(panel.grid=element_blank())
